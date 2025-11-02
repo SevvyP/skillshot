@@ -93,9 +93,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error parsing resume:", error);
-    return NextResponse.json(
-      { error: "Failed to parse resume. Please try again." },
-      { status: 500 }
-    );
+
+    // Provide specific error message if available
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Failed to parse resume. Please try again.";
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
