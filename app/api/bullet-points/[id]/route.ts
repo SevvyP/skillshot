@@ -18,11 +18,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await getOrCreateUser(
-      session.user.sub,
-      session.user.email,
-      session.user.name
-    );
+    const user = await getOrCreateUser(session.user.sub);
 
     const body = await request.json();
     const { text, tags = [] } = body;
@@ -95,11 +91,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await getOrCreateUser(
-      session.user.sub,
-      session.user.email,
-      session.user.name
-    );
+    const user = await getOrCreateUser(session.user.sub);
 
     const bulletPointId = parseInt(params.id);
     if (isNaN(bulletPointId)) {

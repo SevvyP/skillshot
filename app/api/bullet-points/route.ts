@@ -14,11 +14,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await getOrCreateUser(
-      session.user.sub,
-      session.user.email,
-      session.user.name
-    );
+    const user = await getOrCreateUser(session.user.sub);
 
     const bulletPoints = await getBulletPointsByUserId(user.id);
     return NextResponse.json({ bulletPoints });
@@ -39,11 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await getOrCreateUser(
-      session.user.sub,
-      session.user.email,
-      session.user.name
-    );
+    const user = await getOrCreateUser(session.user.sub);
 
     const body = await request.json();
     const { text, tags = [] } = body;
