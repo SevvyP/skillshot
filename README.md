@@ -53,7 +53,21 @@ No automated tests currently implemented. Manual testing via the UI:
 - Add/edit/delete bullet points manually
 - Verify tags are generated automatically
 
-## Database Management
+## Database Configuration
+
+Supports both local PostgreSQL and Supabase. Configure in `.env.local`:
+
+```bash
+# Use local Postgres (default)
+USE_SUPABASE=false
+
+# Or use Supabase
+USE_SUPABASE=true
+SUPABASE_URL=your_project_url
+SUPABASE_KEY=your_anon_key
+```
+
+### Local PostgreSQL Commands
 
 ```bash
 # Start database

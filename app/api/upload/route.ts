@@ -16,11 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await getOrCreateUser(
-      session.user.sub,
-      session.user.email,
-      session.user.name
-    );
+    const user = await getOrCreateUser(session.user.sub);
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
