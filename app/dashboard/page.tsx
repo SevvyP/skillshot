@@ -222,12 +222,12 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-gray-900">skillshot</h1>
           <div className="flex items-center gap-4">
             <span className="text-gray-600">{user.name || user.email}</span>
-            <Link
+            <a
               href="/api/auth/logout"
               className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
             >
               Sign Out
-            </Link>
+            </a>
           </div>
         </div>
       </header>
