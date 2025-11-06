@@ -63,12 +63,12 @@ export default function Home() {
               content from your existing resumes, and organize your skills.
             </p>
 
-            <Link
+            <a
               href="/api/auth/login"
               className="inline-block bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
             >
               Sign In
-            </Link>
+            </a>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mt-12">
