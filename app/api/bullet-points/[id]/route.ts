@@ -5,6 +5,10 @@ import {
   deleteBulletPoint,
   getBulletPointById,
   getOrCreateUser,
+  getOrCreateSkill,
+  linkBulletPointToSkill,
+  unlinkBulletPointFromSkill,
+  getSkillsForBulletPoint,
 } from "@/lib/database";
 
 export async function PUT(
@@ -21,34 +25,37 @@ export async function PUT(
     const user = await getOrCreateUser(session.user.sub);
 
     const body = await request.json();
-    const { text, tags = [] } = body;
+    const { content, skills = [] } = body;
 
     // Security: Validate input
-    if (!text || typeof text !== "string") {
-      return NextResponse.json({ error: "Text is required" }, { status: 400 });
+    if (!content || typeof content !== "string") {
+      return NextResponse.json(
+        { error: "Content is required" },
+        { status: 400 }
+      );
     }
 
     // Security: Enforce reasonable limits
-    if (text.length > 5000) {
+    if (content.length > 5000) {
       return NextResponse.json(
-        { error: "Bullet point text too long (max 5000 characters)" },
+        { error: "Bullet point content too long (max 5000 characters)" },
         { status: 400 }
       );
     }
 
-    // Security: Validate tags array
-    if (!Array.isArray(tags)) {
+    // Security: Validate skills array
+    if (!Array.isArray(skills)) {
       return NextResponse.json(
-        { error: "Tags must be an array" },
+        { error: "Skills must be an array" },
         { status: 400 }
       );
     }
 
-    // Security: Validate each tag and enforce limits
-    const validatedTags = tags
-      .filter((tag): tag is string => typeof tag === "string")
-      .slice(0, 20) // Max 20 tags
-      .map((tag) => tag.substring(0, 50)); // Max 50 chars per tag
+    // Security: Validate each skill and enforce limits
+    const validatedSkills = skills
+      .filter((skill): skill is string => typeof skill === "string")
+      .slice(0, 20) // Max 20 skills
+      .map((skill) => skill.substring(0, 50)); // Max 50 chars per skill
 
     const bulletPointId = parseInt(params.id);
     if (isNaN(bulletPointId)) {
@@ -64,12 +71,38 @@ export async function PUT(
       );
     }
 
+    // Update bullet point
     const bulletPoint = await updateBulletPoint(
       bulletPointId,
       user.id,
-      text,
-      validatedTags
+      content
     );
+
+    // Update skills associations
+    // First, get current skills
+    const currentSkills = await getSkillsForBulletPoint(bulletPointId);
+    const currentSkillNames = new Set(
+      currentSkills.map((s) => s.name.toLowerCase())
+    );
+    const newSkillNames = new Set(
+      validatedSkills.map((s) => s.toLowerCase())
+    );
+
+    // Remove skills that are no longer associated
+    for (const skill of currentSkills) {
+      if (!newSkillNames.has(skill.name.toLowerCase())) {
+        await unlinkBulletPointFromSkill(bulletPointId, skill.id);
+      }
+    }
+
+    // Add new skills
+    for (const skillName of validatedSkills) {
+      if (skillName.trim() && !currentSkillNames.has(skillName.toLowerCase())) {
+        const skill = await getOrCreateSkill(user.id, skillName.trim());
+        await linkBulletPointToSkill(bulletPointId, skill.id);
+      }
+    }
+
     return NextResponse.json({ bulletPoint });
   } catch (error) {
     console.error("Error updating bullet point:", error);

@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@auth0/nextjs-auth0";
-import { getOrCreateUser, createBulletPoint } from "@/lib/database";
+import {
+  getOrCreateUser,
+  createCompany,
+  createJob,
+  createBulletPoint,
+  getOrCreateSkill,
+  linkBulletPointToSkill,
+} from "@/lib/database";
 import {
   extractTextFromPDF,
   extractTextFromWord,
-  extractBulletPointsFromText,
-  parseBulletPointTags,
+  parseResumeContent,
 } from "@/lib/resume-parser";
 
 export async function POST(request: NextRequest) {
@@ -64,28 +70,81 @@ export async function POST(request: NextRequest) {
       text = await extractTextFromWord(buffer);
     }
 
-    // Extract bullet points from text
-    const bulletPointTexts = await extractBulletPointsFromText(text);
+    // Parse resume to extract structured data
+    const parsedResume = await parseResumeContent(text);
 
-    if (bulletPointTexts.length === 0) {
+    if (parsedResume.jobs.length === 0) {
       return NextResponse.json(
-        { error: "No bullet points found in the document." },
+        { error: "No work experience found in the document." },
         { status: 400 }
       );
     }
 
-    // Create bullet points with tags
-    const createdBulletPoints = [];
-    for (const bulletText of bulletPointTexts) {
-      const tags = await parseBulletPointTags(bulletText);
-      const bulletPoint = await createBulletPoint(user.id, bulletText, tags);
-      createdBulletPoints.push(bulletPoint);
+    // Create all skills first
+    const skillMap = new Map<string, number>();
+    for (const skillName of parsedResume.skills) {
+      if (skillName && skillName.trim()) {
+        const skill = await getOrCreateSkill(user.id, skillName.trim());
+        skillMap.set(skillName.trim().toLowerCase(), skill.id);
+      }
+    }
+
+    // Create companies, jobs, and bullet points
+    let totalBulletPoints = 0;
+    const createdJobs = [];
+
+    for (const jobData of parsedResume.jobs) {
+      // Create company
+      const company = await createCompany(
+        user.id,
+        jobData.company,
+        jobData.city,
+        jobData.state,
+        jobData.is_remote
+      );
+
+      // Create job
+      const job = await createJob(
+        user.id,
+        company.id,
+        jobData.title,
+        new Date(jobData.start_date),
+        jobData.end_date ? new Date(jobData.end_date) : null,
+        jobData.is_current
+      );
+
+      // Create bullet points for this job
+      for (const bpData of jobData.bullet_points) {
+        const bulletPoint = await createBulletPoint(
+          user.id,
+          job.id,
+          bpData.text
+        );
+
+        // Link bullet point to skills
+        for (const skillName of bpData.skills) {
+          const skillId = skillMap.get(skillName.toLowerCase());
+          if (skillId && bulletPoint.id) {
+            await linkBulletPointToSkill(bulletPoint.id, skillId);
+          }
+        }
+
+        totalBulletPoints++;
+      }
+
+      createdJobs.push({
+        company: company.name,
+        title: job.title,
+        bulletPointCount: jobData.bullet_points.length,
+      });
     }
 
     return NextResponse.json({
       success: true,
-      count: createdBulletPoints.length,
-      bulletPoints: createdBulletPoints,
+      jobCount: parsedResume.jobs.length,
+      bulletPointCount: totalBulletPoints,
+      skillCount: skillMap.size,
+      jobs: createdJobs,
     });
   } catch (error) {
     console.error("Error parsing resume:", error);
