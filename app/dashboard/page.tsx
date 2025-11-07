@@ -713,7 +713,8 @@ export default function Dashboard() {
                   <div className="space-y-4">
                     {company.jobs.length === 0 ? (
                       <p className="text-sm text-gray-500 italic ml-4">
-                        No jobs yet. Click "Add Job" above to get started.
+                        No jobs yet. Click &quot;Add Job&quot; above to get
+                        started.
                       </p>
                     ) : (
                       company.jobs.map((job) => (
