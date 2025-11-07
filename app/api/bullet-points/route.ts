@@ -4,6 +4,10 @@ import {
   getBulletPointsByUserId,
   createBulletPoint,
   getOrCreateUser,
+  getJobById,
+  getOrCreateSkill,
+  linkBulletPointToSkill,
+  getSkillsForBulletPoint,
 } from "@/lib/database";
 
 export async function GET(request: NextRequest) {
@@ -17,7 +21,16 @@ export async function GET(request: NextRequest) {
     const user = await getOrCreateUser(session.user.sub);
 
     const bulletPoints = await getBulletPointsByUserId(user.id);
-    return NextResponse.json({ bulletPoints });
+    
+    // Fetch skills for each bullet point
+    const bulletPointsWithSkills = await Promise.all(
+      bulletPoints.map(async (bp) => {
+        const skills = bp.id ? await getSkillsForBulletPoint(bp.id) : [];
+        return { ...bp, skills };
+      })
+    );
+    
+    return NextResponse.json({ bulletPoints: bulletPointsWithSkills });
   } catch (error) {
     console.error("Error fetching bullet points:", error);
     return NextResponse.json(
@@ -38,36 +51,67 @@ export async function POST(request: NextRequest) {
     const user = await getOrCreateUser(session.user.sub);
 
     const body = await request.json();
-    const { text, tags = [] } = body;
+    const { content, job_id, skills = [] } = body;
 
     // Security: Validate input
-    if (!text || typeof text !== "string") {
-      return NextResponse.json({ error: "Text is required" }, { status: 400 });
+    if (!content || typeof content !== "string") {
+      return NextResponse.json(
+        { error: "Content is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!job_id || typeof job_id !== "number") {
+      return NextResponse.json(
+        { error: "Job ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify job belongs to user
+    const job = await getJobById(job_id, user.id);
+    if (!job) {
+      return NextResponse.json(
+        { error: "Job not found or does not belong to user" },
+        { status: 404 }
+      );
     }
 
     // Security: Enforce reasonable limits
-    if (text.length > 5000) {
+    if (content.length > 5000) {
       return NextResponse.json(
-        { error: "Bullet point text too long (max 5000 characters)" },
+        { error: "Bullet point content too long (max 5000 characters)" },
         { status: 400 }
       );
     }
 
-    // Security: Validate tags array
-    if (!Array.isArray(tags)) {
+    // Security: Validate skills array
+    if (!Array.isArray(skills)) {
       return NextResponse.json(
-        { error: "Tags must be an array" },
+        { error: "Skills must be an array" },
         { status: 400 }
       );
     }
 
-    // Security: Validate each tag and enforce limits
-    const validatedTags = tags
-      .filter((tag): tag is string => typeof tag === "string")
-      .slice(0, 20) // Max 20 tags
-      .map((tag) => tag.substring(0, 50)); // Max 50 chars per tag
+    // Security: Validate each skill and enforce limits
+    const validatedSkills = skills
+      .filter((skill): skill is string => typeof skill === "string")
+      .slice(0, 20) // Max 20 skills
+      .map((skill) => skill.substring(0, 50)); // Max 50 chars per skill
 
-    const bulletPoint = await createBulletPoint(user.id, text, validatedTags);
+    // Create bullet point
+    const bulletPoint = await createBulletPoint(user.id, job_id, content);
+
+    // Link to skills table
+    for (const skillName of validatedSkills) {
+      if (skillName.trim()) {
+        const skill = await getOrCreateSkill(user.id, skillName.trim());
+        if (bulletPoint.id) {
+          await linkBulletPointToSkill(bulletPoint.id, skill.id);
+        }
+      }
+    }
+
     return NextResponse.json({ bulletPoint }, { status: 201 });
   } catch (error) {
     console.error("Error creating bullet point:", error);
