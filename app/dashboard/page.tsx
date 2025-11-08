@@ -591,13 +591,21 @@ export default function Dashboard() {
               <select
                 value={newBulletJobId || ""}
                 onChange={(e) => setNewBulletJobId(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                  newBulletJobId ? "text-gray-900" : "text-gray-400"
+                }`}
                 required
               >
-                <option value="">Select a job...</option>
+                <option value="" className="text-gray-400">
+                  Select a job...
+                </option>
                 {companies.map((company) =>
                   (company.jobs || []).map((job) => (
-                    <option key={job.id} value={job.id}>
+                    <option
+                      key={job.id}
+                      value={job.id}
+                      className="text-gray-900"
+                    >
                       {company.name} - {job.title}
                     </option>
                   ))
@@ -611,7 +619,7 @@ export default function Dashboard() {
               <textarea
                 value={newBulletText}
                 onChange={(e) => setNewBulletText(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                 rows={3}
                 placeholder="Describe your accomplishment or responsibility..."
                 required
@@ -625,7 +633,7 @@ export default function Dashboard() {
                 type="text"
                 value={newBulletTags}
                 onChange={(e) => setNewBulletTags(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                 placeholder="JavaScript, React, Leadership..."
               />
             </div>
@@ -784,7 +792,7 @@ export default function Dashboard() {
                                         onChange={(e) =>
                                           setEditText(e.target.value)
                                         }
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent mb-2"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent mb-2 text-gray-900"
                                         rows={3}
                                       />
                                       <input
@@ -793,7 +801,7 @@ export default function Dashboard() {
                                         onChange={(e) =>
                                           setEditTags(e.target.value)
                                         }
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent mb-2"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent mb-2 text-gray-900"
                                         placeholder="Skills (comma-separated)"
                                       />
                                       <div className="flex gap-2">
@@ -907,7 +915,9 @@ export default function Dashboard() {
       {showAddCompanyModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Add Company</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">
+              Add Company
+            </h3>
             <form onSubmit={handleAddCompany}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -917,7 +927,7 @@ export default function Dashboard() {
                   type="text"
                   value={newCompanyName}
                   onChange={(e) => setNewCompanyName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                   required
                 />
               </div>
@@ -929,7 +939,7 @@ export default function Dashboard() {
                   type="text"
                   value={newCompanyCity}
                   onChange={(e) => setNewCompanyCity(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                 />
               </div>
               <div className="mb-4">
@@ -940,7 +950,7 @@ export default function Dashboard() {
                   type="text"
                   value={newCompanyState}
                   onChange={(e) => setNewCompanyState(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                   placeholder="e.g., CA, NY"
                 />
               </div>
@@ -985,7 +995,9 @@ export default function Dashboard() {
       {showAddJobModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Add Job</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">
+              Add Job
+            </h3>
             <form onSubmit={handleAddJob}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -994,12 +1006,20 @@ export default function Dashboard() {
                 <select
                   value={newJobCompanyId || ""}
                   onChange={(e) => setNewJobCompanyId(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                    newJobCompanyId ? "text-gray-900" : "text-gray-400"
+                  }`}
                   required
                 >
-                  <option value="">Select a company</option>
+                  <option value="" className="text-gray-400">
+                    Select a company
+                  </option>
                   {companies.map((company) => (
-                    <option key={company.id} value={company.id}>
+                    <option
+                      key={company.id}
+                      value={company.id}
+                      className="text-gray-900"
+                    >
                       {company.name}
                     </option>
                   ))}
@@ -1013,7 +1033,7 @@ export default function Dashboard() {
                   type="text"
                   value={newJobTitle}
                   onChange={(e) => setNewJobTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                   required
                 />
               </div>
@@ -1025,7 +1045,7 @@ export default function Dashboard() {
                   type="date"
                   value={newJobStartDate}
                   onChange={(e) => setNewJobStartDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                   required
                 />
               </div>
@@ -1051,7 +1071,7 @@ export default function Dashboard() {
                     type="date"
                     value={newJobEndDate}
                     onChange={(e) => setNewJobEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                   />
                 </div>
               )}
@@ -1086,7 +1106,9 @@ export default function Dashboard() {
       {showEditJobModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Edit Job</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">
+              Edit Job
+            </h3>
             <form onSubmit={handleEditJob}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1096,7 +1118,7 @@ export default function Dashboard() {
                   type="text"
                   value={newJobTitle}
                   onChange={(e) => setNewJobTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                   required
                 />
               </div>
@@ -1108,7 +1130,7 @@ export default function Dashboard() {
                   type="date"
                   value={newJobStartDate}
                   onChange={(e) => setNewJobStartDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                   required
                 />
               </div>
@@ -1134,7 +1156,7 @@ export default function Dashboard() {
                     type="date"
                     value={newJobEndDate}
                     onChange={(e) => setNewJobEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900"
                   />
                 </div>
               )}
